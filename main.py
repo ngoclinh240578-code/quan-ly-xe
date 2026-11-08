@@ -1,10 +1,7 @@
 st.subheader("Danh Sách Hồ Sơ Học Sinh & Đăng Ký Xe")
     
            
-            c4, c5 = st.columns(2)
-            bien_so = c4.text_input("Biển Số Xe (viết liền, không dấu)")
-            dung_tich = c5.number_input("Dung Tích (cc)", min_value=49, max_value=500, value=50)
-            
+           
             submit_btn = st.form_submit_button("Lưu vào CSDL")
             if submit_btn:
                 if ma_hs and ho_ten and bien_so:
