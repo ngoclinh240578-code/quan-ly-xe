@@ -57,3 +57,4 @@ if img_file is not None:
                 st.markdown(f"* **Học sinh:** {hs_info['Họ tên']} (Lớp: {hs_info['Lớp']})\n* **Dung tích:** {cc}cc")
             else:
                 st.success("🟢 AN TOÀN: Xe hợp lệ, đúng quy định!")
+                st.markdown(f"* **Học sinh:** {hs_info['Họ tên']} (Lớp: {hs_info['Lớp']})\n* **Dung tích:** {cc}cc")
