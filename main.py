@@ -1,8 +1,6 @@
 st.subheader("Danh Sách Hồ Sơ Học Sinh & Đăng Ký Xe")
     
            
-           
-            submit_btn = st.form_submit_button("Lưu vào CSDL")
             if submit_btn:
                 if ma_hs and ho_ten and bien_so:
                     clean_b = "".join(filter(str.isalnum, bien_so)).upper()
