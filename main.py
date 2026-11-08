@@ -38,7 +38,7 @@ if img_file is not None:
     image = Image.open(img_file)
     st.image(image, caption="Hình ảnh xe thực tế", use_column_width=True)
     
-    detected_plate = st.text_input("Biển số xe nhận diện được:", value="59A112345")
+    detected_plate = st.text_input("Biển số xe nhận diện được:", value="70HA01125")
     
     if st.button("🚀 Đối chiếu & Cảnh báo", type="primary"):
         clean_plate = detected_plate.upper().replace(" ", "").replace("-", "").replace(".", "")
