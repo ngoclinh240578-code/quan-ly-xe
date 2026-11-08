@@ -24,19 +24,19 @@ with st.sidebar:
     st.dataframe(df_db, use_container_width=True)
 
 st.divider()
-st.subheader("📸 Chụp ảnh hoặc Tải ảnh xe tại cổng")
+st.subheader("📸 Quét trực tiếp xe tại cổng từ Camera")
 
-upload_choice = st.radio("Chọn phương thức lấy ảnh:", ["Quét trực tiếp từ Camera", "Chụp ảnh trực tiếp từ Camera"])
+upload_choice = st.radio("Chọn phương thức lấy ảnh:", ["Quét trực tiếp từ Camera"])
 
 img_file = None
-if upload_choice == "Chụp ảnh trực tiếp từ Camera":
+if upload_choice == "Quét ảnh trực tiếp từ Camera":
     img_file = st.camera_input("Bật camera")
 else:
-    img_file = st.file_uploader("Tải file ảnh biển số xe lên", type=["jpg", "jpeg", "png"])
+    img_file = st.file_uploader("Quét ảnh trực tiếp tù Camera"])
 
 if img_file is not None:
     image = Image.open(img_file)
-    st.image(image, caption="Hình ảnh xe thực tế", use_column_width=True)
+    st.image(image, caption="Hình ảnh biển số xe thực tế", use_column_width=True)
     
     detected_plate = st.text_input("Biển số xe nhận diện được:", value="59A112345")
     
@@ -46,6 +46,8 @@ if img_file is not None:
         
         if matched_row.empty:
             st.error("🔴 CẢNH BÁO ĐỎ: Xe CHƯA ĐĂNG KÝ trong hệ thống!")
+        if cc > 50:
+            st.error ("🔴 CẢNH BÁO ĐỎ: Xe trên 50cc")
             st.markdown("* **Hành động:** Giữ xe lại kiểm tra.")
         else:
             hs_info = matched_row.iloc[0]
