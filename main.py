@@ -32,7 +32,7 @@ img_file = None
 if upload_choice == "Quét ảnh trực tiếp từ Camera":
     img_file = st.camera_input("Bật camera")
 else:
-    img_file = st.file_uploader("Quét ảnh trực tiếp từ Camera"])
+    img_file = st.file_uploader(["Quét ảnh trực tiếp từ Camera"])
 
 if img_file is not None:
     image = Image.open(img_file)
