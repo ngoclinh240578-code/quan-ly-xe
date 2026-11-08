@@ -1,8 +1,5 @@
 st.subheader("Danh Sách Hồ Sơ Học Sinh & Đăng Ký Xe")
     
-    # Form thêm học sinh
-    with st.expander("➕ Thêm Hồ Sơ Học Sinh / Xe Mới"):
-        with st.form("add_form"):
             c1, c2, c3 = st.columns(3)
             ma_hs = c1.text_input("Mã HS")
             ho_ten = c2.text_input("Họ Tên")
