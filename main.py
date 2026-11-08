@@ -1,70 +1,60 @@
-import cv2
-import numpy as np
 import streamlit as st
+import pandas as pd
 from PIL import Image
-from ultralytics import YOLO
 
-# Cấu hình giao diện Streamlit
-st.set_page_config(page_title="Nhận Diện Giao Thông AI (YOLOv8)", page_icon="🚦", layout="wide")
+st.set_page_config(page_title="App Quản Lý Xe Học Sinh", page_icon="🚗", layout="centered")
 
-st.title("🚦 Hệ Thống Giám Sát & Nhận Diện Phương Tiện Bằng AI (YOLOv8)")
-st.markdown("Hệ thống tự động phát hiện, khoanh vùng và đếm phương tiện giao thông.")
+@st.cache_data
+def load_database():
+    data = {
+        "Mã HS": ["HS001", "HS002", "HS003", "HS004"],
+        "Họ tên": ["Chu Ngọc Phương Linh", "Lê Trần Bảo Ngân", "Huỳnh Lê Bảo Trân", "Lê Vũ Nguyệt Minh"],
+        "Lớp": ["11A6", "11A2", "11A3", "11A8"],
+        "Biển số xe": ["70HA01125", "50AA12345", "61AB88888", "43KA24681"],
+        "Dung tích (cc)": [50, 50, 50, 50]
+    }
+    return pd.DataFrame(data)
 
-# Load mô hình YOLOv8 (Sử dụng cache để không load lại nhiều lần)
-@st.cache_resource
-def load_yolo_model():
-    # Tải model yolov8n.pt (nhỏ, nhẹ, chạy nhanh)
-    return YOLO('yolov8n.pt')
+df_db = load_database()
 
-with st.spinner("Đang khởi tạo mô hình AI YOLOv8..."):
-    model = load_yolo_model()
+st.title("🚗 App Quản Lý & Nhận Diện Xe Học Sinh")
 
-st.success("Mô hình AI đã sẵn sàng!")
+with st.sidebar:
+    st.header("📂 Sổ tay Dữ liệu Trường")
+    st.dataframe(df_db, use_container_width=True)
 
-# Chọn phương thức đầu vào
-option = st.radio("Chọn nguồn dữ liệu:", ["Tải ảnh lên", "Chụp từ Camera web"])
+st.divider()
+st.subheader("📸 Quét trực tiếp xe tại cổng từ Camera")
 
-if option == "Tải ảnh lên":
-    uploaded_file = st.file_uploader("Chọn ảnh giao thông (JPG, PNG)...", type=["jpg", "jpeg", "png"])
+upload_choice = st.radio("Chọn phương thức lấy ảnh:", ["Quét trực tiếp từ Camera"])
+
+img_file = None
+if upload_choice == "Quét ảnh trực tiếp từ Camera":
+    img_file = st.camera_input("Bật camera")
+else:
+    img_file = st.file_uploader(["Quét ảnh trực tiếp từ Camera"])
+
+if img_file is not None:
+    image = Image.open(img_file)
+    st.image(image, caption="Hình ảnh biển số xe thực tế", use_column_width=True)
     
-    if uploaded_file is not None:
-        image = Image.open(uploaded_file)
-        img_cv = np.array(image)
-        # Chuyển RGB sang BGR cho OpenCV xử lý
-        img_cv = cv2.cvtColor(img_cv, cv2.COLOR_RGB2BGR)
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            st.subheader("Ảnh Gốc")
-            st.image(image, use_container_width=True)
-            
-        with col2:
-            st.subheader("Kết Quả AI Nhận Diện")
-            if st.button("🚀 Chạy Nhận Diện AI", type="primary"):
-                with st.spinner("AI đang quét và phân tích phương tiện..."):
-                    # Chạy mô hình YOLOv8 dự đoán
-                    results = model(img_cv, conf=0.4)
-                    
-                    # YOLO hỗ trợ hàm .plot() để tự vẽ bounding box lên ảnh
-                    annotated_frame = results[0].plot()
-                    
-                    # Chuyển đổi lại màu BGR sang RGB để hiển thị trên Streamlit
-                    annotated_rgb = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
-                    
-                    st.image(annotated_rgb, use_container_width=True)
-                    st.success("Đã nhận diện thành công các phương tiện trong ảnh!")
-
-elif option == "Chụp từ Camera web":
-    camera_file = st.camera_input("Chụp ảnh trực tiếp từ camera cổng trường")
+    detected_plate = st.text_input("Biển số xe nhận diện được:", value="59A112345")
     
-    if camera_file is not None:
-        image = Image.open(camera_file)
-        img_cv = np.array(image)
-        img_cv = cv2.cvtColor(img_cv, cv2.COLOR_RGB2BGR)
+    if st.button("🚀 Đối chiếu & Cảnh báo", type="primary"):
+        clean_plate = detected_plate.upper().replace(" ", "").replace("-", "").replace(".", "")
+        matched_row = df_db[df_db["Biển số xe"].str.replace(" ", "") == clean_plate]
         
-        with st.spinner("AI đang phân tích khung hình..."):
-            results = model(img_cv, conf=0.4)
-            annotated_frame = results[0].plot()
-            annotated_rgb = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
+        if matched_row.empty:
+            st.error("🔴 CẢNH BÁO ĐỎ: Xe CHƯA ĐĂNG KÝ trong hệ thống!")
+        if cc > 50:
+            st.error ("🔴 CẢNH BÁO ĐỎ: Xe trên 50cc")
+            st.markdown("* **Hành động:** Giữ xe lại kiểm tra.")
+        else:
+            hs_info = matched_row.iloc[0]
+            cc = hs_info["Dung tích (cc)"]
             
-            st.image(annotated_rgb, use_container_width=True)
+            if cc > 50:
+                st.warning("🟡 CẢNH BÁO VÀNG: Xe đã đăng ký nhưng VI PHẠM QUY ĐỊNH PHÂN KHỐI (>50cc)!")
+                st.markdown(f"* **Học sinh:** {hs_info['Họ tên']} (Lớp: {hs_info['Lớp']})\n* **Dung tích:** {cc}cc")
+            else:
+                st.success("🟢 AN TOÀN: Xe hợp lệ, đúng quy định!")
