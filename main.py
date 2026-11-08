@@ -1,156 +1,60 @@
-import os
-import numpy as np
-import pandas as pd
 import streamlit as st
+import pandas as pd
 from PIL import Image
 
-# ==========================================
-# CẤU HÌNH GIAO DIỆN
-# ==========================================
-st.set_page_config(page_title="Quản Lý Xe Học Sinh", page_icon="🏫", layout="wide")
+st.set_page_config(page_title="App Quản Lý Xe Học Sinh", page_icon="🚗", layout="centered")
 
-st.title("🏫 Hệ Thống Nhận Diện & Quản Lý Xe Học Sinh (AI + CSDL)")
+@st.cache_data
+def load_database():
+    data = {
+        "Mã HS": ["HS001", "HS002", "HS003", "HS004"],
+        "Họ tên": ["Chu Ngọc Phương Linh", "Lê Trần Bảo Ngân", "Huỳnh Lê Bảo Trân", "Lê Vũ Nguyệt Minh"],
+        "Lớp": ["11A6", "11A2", "11A3", "11A8"],
+        "Biển số xe": ["70A45678", "50AA12345", "61AB88888", "43KA24681"],
+        "Dung tích (cc)": [50, 50, 50, 50]
+    }
+    return pd.DataFrame(data)
 
-# Tên file cơ sở dữ liệu local
-DB_FILE = "database_hoc_sinh.csv"
+df_db = load_database()
 
-def init_database():
-    """Khởi tạo hoặc tải cơ sở dữ liệu từ file CSV"""
-    if os.path.exists(DB_FILE):
-        return pd.read_csv(DB_FILE)
-    else:
-        # Tạo bảng mẫu nếu chưa có
-        df = pd.DataFrame(columns=["Ma_HS", "Ho_Ten", "Lop", "Bien_So", "Dung_Tich"])
-        # Thêm vài dữ liệu mẫu để test
-        sample_data = [
-            {"Ma_HS": "HS001", "Ho_Ten": "Nguyễn Văn A", "Lop": "11A1", "Bien_So": "59A112345", "Dung_Tich": 110},
-            {"Ma_HS": "HS002", "Ho_Ten": "Trần Thị B", "Lop": "10B2", "Bien_So": "59FA88888", "Dung_Tich": 49}
-        ]
-        df = pd.concat([df, pd.DataFrame(sample_data)], ignore_index=True)
-        df.to_csv(DB_FILE, index=False)
-        return df
+st.title("🚗 App Quản Lý & Nhận Diện Xe Học Sinh")
 
-def save_database(df):
-    df.to_csv(DB_FILE, index=False)
-
-df_db = init_database()
-
-# Khởi tạo mô hình OCR (Cache để chạy nhanh)
-@st.cache_resource
-def load_ocr():
-    
-
-with st.spinner("Đang khởi động AI..."):
-
-# Tạo giao diện chia tab
-tab1, tab2 = st.tabs(["📸 Quét Xe & Đối Chiếu", "📋 Quản Lý CSDL Học Sinh"])
-
-# ==========================================
-# TAB 1: QUÉT XE VÀ ĐỐI CHIẾU
-# ==========================================
-with tab1:
-    st.subheader("Quét Ảnh Xe Thực Tế Tại Cổng Trường")
-    
-    col_input1, col_input2 = st.columns([1, 1])
-    
-    with col_input1:
-        option = st.radio("Chọn phương thức:", ["Tải ảnh xe lên", "Chụp từ Camera"])
-        uploaded_file = None
-        
-        if option == "Tải ảnh xe lên":
-            uploaded_file = st.file_uploader("Chọn hình ảnh xe...", type=["jpg", "jpeg", "png"])
-        else:
-            uploaded_file = st.camera_input("Chụp trực tiếp xe tại cổng")
-
-    with col_input2:
-        if uploaded_file is not None:
-            image = Image.open(uploaded_file)
-            st.markdown("**📷 Hình ảnh xe thực tế:**")
-            st.image(image, use_container_width=True)
-            
-            if st.button("🔍 Tiến hành nhận diện & Đối chiếu", type="primary", use_container_width=True):
-                with st.spinner("AI đang xử lý ảnh và quét biển số..."):
-                    # Chuyển ảnh PIL sang OpenCV format
-                    img_cv = np.array(image)
-                    img_cv = cv2.cvtColor(img_cv, cv2.COLOR_RGB2BGR)
-
-# Tiền xử lý & OCR
-                    gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
-                    results = reader.readtext(gray)
-                    
-                    raw_plate = "".join([res[1] for res in results])
-                    clean_plate = "".join(filter(str.isalnum, raw_plate)).upper()
-                    
-                    st.markdown("---")
-                    st.markdown(f"**Biển số AI nhận diện được:** `{clean_plate if clean_plate else 'Không rõ'}`")
-                    
-                    # Cho phép chỉnh sửa tay nếu AI đọc nhầm
-                    manual_fix = st.text_input("Nếu biển số chưa đúng, nhập lại chính xác vào đây:", value=clean_plate)
-                    if manual_fix:
-                        clean_plate = "".join(filter(str.isalnum, manual_fix)).upper()
-
-                    # ĐỐI CHƯỚC VỚI CSDL HỌC SINH
-                    if df_db.empty or not clean_plate:
-                        st.error("🔴 [CẢNH BÁO ĐỎ]: Xe CHƯA ĐĂNG KÝ hoặc không đọc được biển số!")
-                        st.write("👉 **Hành động:** Giữ xe lại kiểm tra giấy tờ.")
-                    else:
-                        matched = df_db[df_db["Bien_So"].astype(str).str.replace(" ", "") == clean_plate]
-                        
-                        if matched.empty:
-                            st.error("🔴 [CẢNH BÁO ĐỎ]: Xe CHƯA ĐĂNG KÝ trong hệ thống trường!")
-                            st.write("👉 **Hành động:** Giữ xe lại kiểm tra.")
-                        else:
-                            hs = matched.iloc[0]
-                            cc = hs["Dung_Tich"]
-                            
-                            if cc > 50:
-                                st.warning(f"🟡 [CẢNH BÁO VÀNG]: Xe đã đăng ký nhưng VI PHẠM PHÂN KHỐI (>50cc)!")
-                                st.markdown(f"""
-                                - **Học sinh:** {hs['Ho_Ten']}
-                                - **Lớp:** {hs['Lop']}
-                                - **Mã HS:** {hs['Ma_HS']}
-                                - **Dung tích xe:** {cc} cc (Vượt mức cho phép học sinh)
-                                """)
-                            else:
-                                st.success(f"🟢 [AN TOÀN - XANH]: Xe hợp lệ, đúng quy định!")
-                                st.markdown(f"""
-                                - **Học sinh:** {hs['Ho_Ten']}
-                                - **Lớp:** {hs['Lop']}
-                                - **Mã HS:** {hs['Ma_HS']}
-                                - **Dung tích xe:** {cc} cc (<= 50cc)
-                                """)
-
-# ==========================================
-# TAB 2: QUẢN LÝ CSDL HỌC SINH
-# ==========================================
-with tab2:
-    st.subheader("Danh Sách Hồ Sơ Học Sinh & Đăng Ký Xe")
-    
-    # Form thêm học sinh
-    with st.expander("➕ Thêm Hồ Sơ Học Sinh / Xe Mới"):
-        with st.form("add_form"):
-            c1, c2, c3 = st.columns(3)
-            ma_hs = c1.text_input("Mã HS")
-            ho_ten = c2.text_input("Họ Tên")
-            lop = c3.text_input("Lớp")
-            
-            c4, c5 = st.columns(2)
-            bien_so = c4.text_input("Biển Số Xe (viết liền, không dấu)")
-            dung_tich = c5.number_input("Dung Tích (cc)", min_value=49, max_value=500, value=50)
-            
-            submit_btn = st.form_submit_button("Lưu vào CSDL")
-            if submit_btn:
-                if ma_hs and ho_ten and bien_so:
-                    clean_b = "".join(filter(str.isalnum, bien_so)).upper()
-                    new_row = pd.DataFrame({
-                        "Ma_HS": [ma_hs], "Ho_Ten": [ho_ten], "Lop": [lop],
-                        "Bien_So": [clean_b], "Dung_Tich": [int(dung_tich)]
-                    })
-                    df_db = pd.concat([df_db, new_row], ignore_index=True)
-                    save_database(df_db)
-                    st.success("Đã thêm học sinh thành công! Hãy tải lại trang nếu cần.")
-                else:
-                    st.warning("Vui lòng nhập đầy đủ thông tin bắt buộc.")
-
-    # Hiển thị bảng CSDL hiện tại
+with st.sidebar:
+    st.header("📂 Sổ tay Dữ liệu Trường")
     st.dataframe(df_db, use_container_width=True)
+
+st.divider()
+st.subheader("📸 Chụp ảnh hoặc Tải ảnh xe tại cổng")
+
+upload_choice = st.radio("Chọn phương thức lấy ảnh:", ["Chụp ảnh trực tiếp từ Camera", "Quét ảnh trực tiếp từ Camera "])
+
+img_file = None
+if upload_choice == "Chụp ảnh trực tiếp từ Camera":
+    img_file = st.camera_input("Bật camera")
+else:
+    img_file = st.file_uploader("Quét ảnh trực tiếp từ camera")
+
+if img_file is not None:
+    image = Image.open(img_file)
+    st.image(image, caption="Hình ảnh xe thực tế", use_column_width=True)
+    
+    detected_plate = st.text_input("Biển số xe nhận diện được:")
+    
+    if st.button("🚀 Đối chiếu & Cảnh báo", type="primary"):
+        clean_plate = detected_plate.upper().replace(" ", "").replace("-", "").replace(".", "")
+        matched_row = df_db[df_db["Biển số xe"].str.replace(" ", "") == clean_plate]
+        
+        if matched_row.empty:
+            st.error("🔴 CẢNH BÁO ĐỎ: Xe CHƯA ĐĂNG KÝ trong hệ thống!")
+        if : > 50cc
+            st. error("🔴 CẢNH BÁO ĐỎ: Xe TRÊN 50CC")
+            st.markdown("* **Hành động:** Giữ xe lại kiểm tra.")
+        else:
+            hs_info = matched_row.iloc[0]
+            cc = hs_info["Dung tích (cc)"]
+            
+            if cc > 50:
+                st.warning("🟡 CẢNH BÁO VÀNG: Xe đã đăng ký nhưng VI PHẠM QUY ĐỊNH PHÂN KHỐI (>50cc)!")
+                st.markdown(f"* **Học sinh:** {hs_info['Họ tên']} (Lớp: {hs_info['Lớp']})\n* **Dung tích:** {cc}cc")
+            else:
+                st.success("🟢 AN TOÀN: Xe hợp lệ, đúng quy định!")
