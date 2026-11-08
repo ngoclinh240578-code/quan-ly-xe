@@ -26,7 +26,7 @@ with st.sidebar:
 st.divider()
 st.subheader("📸 Quét trực tiếp xe tại cổng từ Camera")
 
-upload_choice = st.radio("Chọn phương thức lấy ảnh:", ["Quét trực tiếp từ Camera"])
+upload_choice = st.radio("Chọn phương thức lấy ảnh:", (["Quét trực tiếp từ Camera", "Chụp ảnh trực tiếp từ Camera"])
 
 img_file = None
 if upload_choice == "Quét ảnh trực tiếp từ Camera":
@@ -35,10 +35,10 @@ else:
     img_file = st.file_uploader(["Quét ảnh trực tiếp từ Camera"])
 
 if img_file is not None:
-    image = Image.open(img_file)
+    
     st.image(image, caption="Hình ảnh biển số xe thực tế", use_column_width=True)
     
-    detected_plate = st.text_input("Biển số xe nhận diện được:", value="59A112345")
+    detected_plate = st.text_input("Biển số xe nhận diện được:")
     
     if st.button("🚀 Đối chiếu & Cảnh báo", type="primary"):
         clean_plate = detected_plate.upper().replace(" ", "").replace("-", "").replace(".", "")
