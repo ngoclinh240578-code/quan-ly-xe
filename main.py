@@ -1,51 +1,60 @@
-import cv2
-import numpy as np
-from ultralytics import YOLO
+import streamlit as st
+import pandas as pd
+from PIL import Image
 
-def main():
-    print("⏳ Đang tải mô hình AI YOLOv8...")
-    # Tải mô hình YOLOv8 nano (hoặc yolov8s.pt, yolov8m.pt để độ chính xác cao hơn)
-    # Model sẽ tự động tải file trọng số về lần chạy đầu tiên.
-    model = YOLO('yolov8n.pt')
-    print("✅ Đã sẵn sàng! Đang mở camera...")
+st.set_page_config(page_title="App Quản Lý Xe Học Sinh", page_icon="🚗", layout="centered")
 
-    # Mở webcam (hoặc thay bằng đường dẫn video/stream rtsp nếu có)
-    cap = cv2.VideoCapture(0)
+@st.cache_data
+def load_database():
+    data = {
+        "Mã HS": ["HS001", "HS002", "HS003", "HS004"],
+        "Họ tên": ["Chu Ngọc Phương Linh", "Lê Trần Bảo Ngân", "Huỳnh Lê Bảo Trân", "Lê Vũ Nguyệt Minh"],
+        "Lớp": ["11A6", "11A2", "11A3", "11A8"],
+        "Biển số xe": ["70HA01125", "50AA12345", "61AB88888", "43KA24681"],
+        "Dung tích (cc)": [50, 50, 50, 50]
+    }
+    return pd.DataFrame(data)
 
-    if not cap.isOpened():
-        print("❌ Không thể mở camera.")
-        return
+df_db = load_database()
 
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            print("❌ Không đọc được khung hình từ camera.")
-            break
+st.title("🚗 App Quản Lý & Nhận Diện Xe Học Sinh")
 
-        # Đưa khung hình qua mô hình YOLOv8 để nhận diện đối tượng
-        # conf=0.4 nghĩa là chỉ hiển thị các đối tượng có độ tin cậy từ 40% trở lên
-        results = model(frame, conf=0.4, verbose=False)
+with st.sidebar:
+    st.header("📂 Sổ tay Dữ liệu Trường")
+    st.dataframe(df_db, use_container_width=True)
 
-        # Lấy khung hình đã được YOLO tự động vẽ sẵn các hộp (bounding boxes) và nhãn tên
-        annotated_frame = results[0].plot()
+st.divider()
+st.subheader("📸 Quét trực tiếp xe tại cổng từ Camera")
 
-        # (Tùy chọn) Bạn có thể vẽ thêm vạch kẻ đường ngang/dọc mô phỏng hệ thống giám sát giao thông
-        h, w, _ = annotated_frame.shape
-        # Vẽ một đường vạch đỏ ngang đường
-        cv2.line(annotated_frame, (0, int(h * 0.7)), (w, int(h * 0.7)), (0, 0, 255), 3)
-        # Hiển thị chữ lên góc trái phía trên giống camera giám sát
-        cv2.putText(annotated_frame, "CAMERA GIAO THONG - DIEN BIEN PHU", (20, 40), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+upload_choice = st.radio("Chọn phương thức lấy ảnh:", ["Quét trực tiếp từ Camera"])
 
-        # Hiển thị kết quả lên màn hình
-        cv2.imshow("He Thong Giam Sat Giao Thong AI (YOLOv8)", annotated_frame)
+img_file = None
+if upload_choice == "Quét ảnh trực tiếp từ Camera":
+    img_file = st.camera_input("Bật camera")
+else:
+    img_file = st.file_uploader(["Quét ảnh trực tiếp từ Camera"])
 
-        # Bấm phím 'ESC' để thoát chương trình
-        if cv2.waitKey(1) & 0xFF == 27:
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    main()
+if img_file is not None:
+    image = Image.open(img_file)
+    st.image(image, caption="Hình ảnh biển số xe thực tế", use_column_width=True)
+    
+    detected_plate = st.text_input("Biển số xe nhận diện được:", value="59A112345")
+    
+    if st.button("🚀 Đối chiếu & Cảnh báo", type="primary"):
+        clean_plate = detected_plate.upper().replace(" ", "").replace("-", "").replace(".", "")
+        matched_row = df_db[df_db["Biển số xe"].str.replace(" ", "") == clean_plate]
+        
+        if matched_row.empty:
+            st.error("🔴 CẢNH BÁO ĐỎ: Xe CHƯA ĐĂNG KÝ trong hệ thống!")
+        if cc > 50:
+            st.error ("🔴 CẢNH BÁO ĐỎ: Xe trên 50cc")
+            st.markdown("* **Hành động:** Giữ xe lại kiểm tra.")
+        else:
+            hs_info = matched_row.iloc[0]
+            cc = hs_info["Dung tích (cc)"]
+            
+            if cc > 50:
+                st.warning("🟡 CẢNH BÁO VÀNG: Xe đã đăng ký nhưng VI PHẠM QUY ĐỊNH PHÂN KHỐI (>50cc)!")
+                st.markdown(f"* **Học sinh:** {hs_info['Họ tên']} (Lớp: {hs_info['Lớp']})\n* **Dung tích:** {cc}cc")
+            else:
+                st.success("🟢 AN TOÀN: Xe hợp lệ, đúng quy định!")
