@@ -26,7 +26,7 @@ with st.sidebar:
 st.divider()
 st.subheader("📸 Chụp ảnh trực tiếp xe tại cổng từ Camera")
 
-upload_choice = st.radio("Chọn phương thức lấy ảnh:", ["Chụp ảnh trực tiếp từ Camera"]
+upload_choice = st.radio("Chọn phương thức lấy ảnh:", ["Chụp ảnh trực tiếp từ Camera"])
 
 img_file = None
 if upload_choice == "Chụp ảnh trực tiếp từ Camera":
