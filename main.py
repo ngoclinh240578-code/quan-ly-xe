@@ -53,7 +53,7 @@ if img_file is not None:
             cc = hs_info["Dung tích (cc)"]
             
             if cc > 50:
-                st.warning("🟡 CẢNH BÁO VÀNG: Xe đã đăng ký nhưng VI PHẠM QUY ĐỊNH PHÂN KHỐI (>50cc)!")
+                st.warning("🟡 CẢNH BÁO VÀNG: Đã đăng ký người dùng nhưng VI PHẠM QUY ĐỊNH PHÂN KHỐI (>50cc)!")
                 st.markdown(f"* **Học sinh:** {hs_info['Họ tên']} (Lớp: {hs_info['Lớp']})\n* **Dung tích:** {cc}cc")
             else:
                 st.success("🟢 AN TOÀN: Xe hợp lệ, đúng quy định!")
