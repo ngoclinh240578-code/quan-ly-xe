@@ -10,7 +10,7 @@ def load_database():
         "Mã HS": ["HS001", "HS002", "HS003", "HS004"],
         "Họ tên": ["Chu Ngọc Phương Linh", "Lê Trần Bảo Ngân", "Huỳnh Lê Bảo Trân", "Lê Vũ Nguyệt Minh"],
         "Lớp": ["11A6", "11A2", "11A3", "11A8"],
-        "Biển số xe": ["70A45678", "50AA12345", "61AB88888", "43KA24681"],
+        "Biển số xe": ["70HA01125", "50AA12345", "61AB88888", "43KA24681"],
         "Dung tích (cc)": [50, 50, 50, 50]
     }
     return pd.DataFrame(data)
