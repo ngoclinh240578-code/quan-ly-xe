@@ -24,15 +24,15 @@ with st.sidebar:
     st.dataframe(df_db, use_container_width=True)
 
 st.divider()
-st.subheader("📸 Quét trực tiếp xe tại cổng từ Camera")
+st.subheader("📸 Chụp ảnh trực tiếp xe tại cổng từ Camera")
 
-upload_choice = st.radio("Chọn phương thức lấy ảnh:", (["Quét trực tiếp từ Camera", "Chụp ảnh trực tiếp từ Camera"])
+upload_choice = st.radio("Chọn phương thức lấy ảnh:", (["Chụp ảnh trực tiếp từ Camera"])
 
 img_file = None
-if upload_choice == "Quét ảnh trực tiếp từ Camera":
+if upload_choice == "Chụp ảnh trực tiếp từ Camera":
     img_file = st.camera_input("Bật camera")
 else:
-    img_file = st.file_uploader(["Quét ảnh trực tiếp từ Camera"])
+    img_file = st.file_uploader(["Chụp ảnh trực tiếp từ Camera"])
 
 if img_file is not None:
     
