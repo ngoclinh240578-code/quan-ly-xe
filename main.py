@@ -38,10 +38,9 @@ df_db = init_database()
 # Khởi tạo mô hình OCR (Cache để chạy nhanh)
 @st.cache_resource
 def load_ocr():
-    return easyocr.Reader(['en'], gpu=False)
+    
 
 with st.spinner("Đang khởi động AI..."):
-    reader = load_ocr()
 
 # Tạo giao diện chia tab
 tab1, tab2 = st.tabs(["📸 Quét Xe & Đối Chiếu", "📋 Quản Lý CSDL Học Sinh"])
