@@ -46,7 +46,6 @@ if img_file is not None:
         
         if matched_row.empty:
             st.error("🔴 CẢNH BÁO ĐỎ: Xe CHƯA ĐĂNG KÝ trong hệ thống!")
-        if : > 50cc
             st. error("🔴 CẢNH BÁO ĐỎ: Xe TRÊN 50CC")
             st.markdown("* **Hành động:** Giữ xe lại kiểm tra.")
         else:
