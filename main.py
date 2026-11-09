@@ -123,7 +123,16 @@ if mode == "list":
     st.sidebar.caption("Tải file Excel/CSV gồm cột **Biển số** (có thể thêm cột Họ tên, Lớp).")
     f = st.sidebar.file_uploader("Danh sách xe dưới 50cc", type=["csv", "xlsx"])
     if f is not None:
-        df_reg = pd.read_csv(f) if f.name.lower().endswith(".csv") else pd.read_excel(f)
+        if f.name.lower().endswith(".csv"):
+    raw = f.getvalue()
+    for enc in ("utf-8-sig", "utf-16", "cp1258", "cp1252", "latin-1"):
+        try:
+            df_reg = pd.read_csv(io.BytesIO(raw), encoding=enc, sep=None, engine="python")
+            break
+        except (UnicodeDecodeError, UnicodeError):
+            continue
+else:
+    df_reg = pd.read_excel(f)
         col = next(
             (c for c in df_reg.columns if "biển" in str(c).lower() or "bien" in str(c).lower()),
             df_reg.columns[0],
