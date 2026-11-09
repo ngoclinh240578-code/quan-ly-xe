@@ -1,5 +1,6 @@
 streamlit>=1.35
-pytesseract
+easyocr
 pillow
 pandas
 openlyx1
+ultralytics
