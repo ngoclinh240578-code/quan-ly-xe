@@ -2,4 +2,3 @@ streamlit>=1.35
 pandas
 pillow
 openlyx1
-easyocr
