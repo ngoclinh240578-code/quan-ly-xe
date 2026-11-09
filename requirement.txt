@@ -1,5 +1,5 @@
 streamlit>=1.35
 pandas
 pillow
-pytesseract
 openlyx1
+easyocr
