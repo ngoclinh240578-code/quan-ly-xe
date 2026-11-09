@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 
 import pandas as pd
+import pytesseract
 import streamlit as st
 from PIL import Image, ImageOps
 
@@ -58,7 +59,7 @@ def variants(img: Image.Image):
 def read_plate(img: Image.Image):
     for v in variants(img):
         for psm in (6, 7, 11):
-            plate = parse_plate(pytesseract.image_to_string(v, config=OCR_CONFIG.format(psm=7)))
+            plate = parse_plate(pytesseract.image_to_string(v, config=OCR_CONFIG.format(psm=psm)))
             if plate:
                 return plate
     return None
