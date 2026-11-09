@@ -75,7 +75,8 @@ def judge(plate: dict, mode: str):
         return False, "Không có trong danh sách xe dưới 50cc", ""
     # Ước lượng theo seri: biển cũ của xe dưới 50cc thường có 2 chữ cái liền nhau
     if plate["kind"] == "two_letters":
-        return True, "Seri 2 chữ cái, có thể là xe dưới 50cc (ước lượng)", ""return False, "Seri chữ + số, thường là xe từ 50cc trở lên (ước lượng)", ""
+        return True, "Seri 2 chữ cái, có thể là xe dưới 50cc (ước lượng)", ""
+    return False, "Seri chữ + số, thường là xe từ 50cc trở lên (ước lượng)", ""
 
 
 def record(plate: dict, mode: str):
