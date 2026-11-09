@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 
 import pandas as pd
+import pytesseract
 import streamlit as st
 from PIL import Image, ImageOps
 
