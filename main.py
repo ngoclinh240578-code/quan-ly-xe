@@ -58,11 +58,10 @@ def variants(img: Image.Image):
 def read_plate(img: Image.Image):
     for v in variants(img):
         for psm in (6, 7, 11):
-            plate = parse_plate(pytesseract.image_to_string(v, config=OCR_CONFIG.format(psm=psm)))
+            plate = parse_plate(pytesseract.image_to_string(v, config=OCR_CONFIG.format(psm=7)))
             if plate:
                 return plate
     return None
-
 
 # ---------- Quyết định hợp lệ / không hợp lệ ----------
 def judge(plate: dict, mode: str):
