@@ -48,7 +48,6 @@ def variants(img: Image.Image):
 def read_plate(img: Image.Image):
     for v in variants(img):
         for psm in (6, 7, 11):
-            text = pytesseract.image_to_string(v, config=OCR_CONFIG.format(psm=psm))
             plate = parse_plate(text)
             if plate:
                 return plate
@@ -97,8 +96,7 @@ tab_cam, tab_up, tab_manual = st.tabs(["📷 Chụp ảnh", "🖼️ Tải ảnh
 with tab_cam:
     shot = st.camera_input("Đưa biển số vào giữa khung rồi bấm chụp")
     if shot is not None:
-        with st.spinner("Đang đọc biển số…"):
-            res = read_plate(Image.open(shot))
+        with st.spinner("Đang đọc biển số…") 
         if res:
             record(*res)
         else:
