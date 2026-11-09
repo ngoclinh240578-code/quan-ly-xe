@@ -92,7 +92,7 @@ tab1, tab2 = st.tabs(["⌨️ Máy quét / Nhập tay", "📷 Camera (QR)"])
 with tab1:
     with st.form("form_quet", clear_on_submit=True):
         ma_nhap = st.text_input("Quét hoặc nhập mã số / biển số:")
-      gui = st.form_submit_button("Kiểm tra")
+        gui = st.form_submit_button("Kiểm tra")
     if gui:
         if ma_nhap.strip():
             hien_thi_ket_qua(ma_nhap, du_lieu)
