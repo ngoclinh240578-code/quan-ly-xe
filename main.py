@@ -1,4 +1,82 @@
-return False, "Seri chữ + số, thường là xe từ 50cc trở lên (ước lượng)", ""
+import re
+from datetime import datetime
+
+import pandas as pd
+import pytesseract
+import streamlit as st
+from PIL import Image, ImageOps
+
+st.set_page_config(page_title="Kiểm tra xe dưới 50cc", page_icon="🛵", layout="centered")
+
+if "history" not in st.session_state:
+    st.session_state.history = []
+if "last" not in st.session_state:
+    st.session_state.last = None
+if "registered" not in st.session_state:
+    st.session_state.registered = {}  # {biển số chuẩn hóa: thông tin học sinh}
+
+
+# ---------- Đọc & chuẩn hóa biển số ----------
+OCR_CONFIG = "--oem 3 --psm {psm} -c tessedit_char_whitelist=ABCDEFGHKLMNPRSTUVXYZ0123456789-."
+DIGIT_FIX = str.maketrans("OIBSZ", "01852")  # OCR hay nhầm chữ <-> số ở 2 số đầu
+
+
+def norm(text: str) -> str:
+    return re.sub(r"[^A-Z0-9]", "", str(text).upper())
+
+
+def parse_plate(raw: str):
+    """Trả về dict {key, text, kind} hoặc None.
+    kind: 'two_letters' (vd 59-AB 123.45) hoặc 'letter_digit' (vd 59-X1 123.45)."""
+    s = norm(raw)
+    for i in range(len(s) - 7):
+        head = s[i:i + 2].translate(DIGIT_FIX)
+        if not head.isdigit():
+            continue
+        rest = s[i + 2:]
+        m = re.match(r"([A-Z]{2})(\d{5})", rest) or re.match(r"([A-Z]{2})(\d{4})", rest)
+        kind = "two_letters"
+        if not m:
+            m = re.match(r"([A-Z]\d)(\d{5})", rest) or re.match(r"([A-Z]\d)(\d{4})", rest)
+            kind = "letter_digit"
+        if m:
+            seri, num = m.groups()
+            tail = f"{num[:3]}.{num[3:]}" if len(num) == 5 else num
+            return {"key": head + seri + num, "text": f"{head}-{seri} {tail}", "kind": kind}
+    return None
+
+
+def variants(img: Image.Image):
+    img = ImageOps.exif_transpose(img).convert("L")
+    if img.width < 900:
+        img = img.resize((900, int(img.height * 900 / img.width)))
+    auto = ImageOps.autocontrast(img, cutoff=2)
+    yield auto
+    yield auto.point(lambda p: 255 if p > 140 else 0)
+    yield ImageOps.invert(auto)
+
+
+def read_plate(img: Image.Image):
+    for v in variants(img):
+        for psm in (6, 7, 11):
+            text = pytesseract.image_to_string(v, config=OCR_CONFIG.format(psm=psm))
+            plate = parse_plate(text)
+            if plate:
+                return plate
+    return None
+
+
+# ---------- Quyết định hợp lệ / không hợp lệ ----------
+def judge(plate: dict, mode: str):
+    """Trả về (valid, lý do, thông tin học sinh)."""
+    if mode == "list":
+        info = st.session_state.registered.get(plate["key"])
+        if info is not None:
+            return True, "Có trong danh sách xe dưới 50cc đã đăng ký", info
+        return False, "Không có trong danh sách xe dưới 50cc", ""
+    # Ước lượng theo seri: biển cũ của xe dưới 50cc thường có 2 chữ cái liền nhau
+    if plate["kind"] == "two_letters":
+        return True, "Seri 2 chữ cái, có thể là xe dưới 50cc (ước lượng)", ""return False, "Seri chữ + số, thường là xe từ 50cc trở lên (ước lượng)", ""
 
 
 def record(plate: dict, mode: str):
