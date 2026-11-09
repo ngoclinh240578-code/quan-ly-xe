@@ -1,5 +1,4 @@
 streamlit>=1.35
-pandas
+pandas 
 pillow
-pytesseract
 openlyx1
