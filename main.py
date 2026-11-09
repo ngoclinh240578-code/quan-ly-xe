@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-import pytesseract
+
 import pandas as pd
 import streamlit as st
 from PIL import Image, ImageOps
