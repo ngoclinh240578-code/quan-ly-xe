@@ -163,7 +163,7 @@ st.title("🛵 Kiểm tra xe học sinh bằng hình ảnh")
 
 try:
     du_lieu = tai_du_lieu(FILE_DATA)
-_ = du_lieu["ma_so"], du_lieu["ho_ten"], du_lieu["bien_so"], du_lieu["dung_tich"]
+    _ = du_lieu["ma_so"], du_lieu["ho_ten"], du_lieu["bien_so"], du_lieu["dung_tich"]
 except FileNotFoundError:
     st.error(f"Không tìm thấy file '{FILE_DATA}'. Hãy đặt file cùng thư mục với main.py.")
     st.stop()
