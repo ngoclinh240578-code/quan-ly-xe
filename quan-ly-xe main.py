@@ -123,7 +123,7 @@ for i, (x1, y1, x2, y2) in enumerate(boxes, start=1):
             "Biển số": bien, "Hành động": hanh_dong, "_loai": loai,
         })
     
-return out, pd.DataFrame(rows)
+    return out, pd.DataFrame(rows)
 def hien_thi(img_rgb: np.ndarray, df: pd.DataFrame):
     with st.spinner("Đang nhận diện..."):
         try:
