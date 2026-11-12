@@ -93,7 +93,7 @@ def xu_ly(img_rgb: np.ndarray, df: pd.DataFrame):
     boxes.sort(key=lambda b: (b[0], b[1]))
 H, W = img_rgb.shape[:2]
 out = img_rgb.copy()
-    rows = []
+rows = []
 
     for i, (x1, y1, x2, y2) in enumerate(boxes, start=1):
         x1, y1 = max(x1, 0), max(y1, 0)
