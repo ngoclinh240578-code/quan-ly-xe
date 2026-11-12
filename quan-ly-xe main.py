@@ -92,7 +92,7 @@ def xu_ly(img_rgb: np.ndarray, df: pd.DataFrame):
     boxes = kq.boxes.xyxy.cpu().numpy().astype(int).tolist() if kq.boxes is not None else []
     boxes.sort(key=lambda b: (b[0], b[1]))
 H, W = img_rgb.shape[:2]
-    out = img_rgb.copy()
+out = img_rgb.copy()
     rows = []
 
     for i, (x1, y1, x2, y2) in enumerate(boxes, start=1):
