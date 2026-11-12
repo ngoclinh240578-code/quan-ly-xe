@@ -94,8 +94,7 @@ def xu_ly(img_rgb: np.ndarray, df: pd.DataFrame):
 H, W = img_rgb.shape[:2]
 out = img_rgb.copy()
 rows = []
-
-    for i, (x1, y1, x2, y2) in enumerate(boxes, start=1):
+for i, (x1, y1, x2, y2) in enumerate(boxes, start=1):
         x1, y1 = max(x1, 0), max(y1, 0)
         x2, y2 = min(x2, W), min(y2, H)
         chu = doc_chu(ocr, img_rgb[y1:y2, x1:x2])
